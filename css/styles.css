@@ -262,37 +262,27 @@ gets 2/3 of the page. You can adjust this to your personal liking. */
     position: relative;
     top: 0;
     width: 800px;
+    min-width: 240px;
     margin-top: 0;
   }
   
   .mapboxgl-ctrl-geocoder > div {
     min-width: 100%;
     margin-left: 0;
+    width: 300px;
   }
 
-/* #toRoute{
-    background: rgb(255, 255, 255);
-    border-radius: 10px;
-    padding: 10px;
-    position: absolute;
-    margin: 10px 25px 25px 520px;
-    right:0;
-}
-
-.distance-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-}
-     
-.distance-container > * {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 30px;
-    line-height: 50px;
-    display: block;
-    margin: 0;
-    padding: 5px 10px;
-    border-radius: 3px;
-} */
+  .mapboxgl-ctrl-geocoder--input {
+    font: inherit;
+    width: 100%;
+    border: 0;
+    background-color: #fff;
+    margin-left: 100px;
+    height: 50px;
+    color: #fff; /* fallback */
+    color: rgba(0, 0, 0, 0.75);
+    padding: 40px 45px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }

@@ -618,6 +618,7 @@ map.on('load', () => {
   buildLocationList(stations);  // list stasiun di sidebar
   addMarkers();                 // tambahkan marker lokasi stasiun
 
+  // berdasarkan hasil geodecoder
   geocoder.on('result', (event) => {
     const searchResult = event.result.geometry;
 

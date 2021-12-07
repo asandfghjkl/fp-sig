@@ -6,13 +6,12 @@
         <title>Jalur Kereta Api Dhoho - Penataran</title>
         <meta name="robots" content="noindex, nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- import GL JS -->
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
-        <link rel="stylesheet" href="css/styles.css" />
-        <script src="https://js.sentry-cdn.com/9c5feb5b248b49f79a585804c259febc.min.js" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
       
-        
+        <!-- Direction plugin -->
         <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
         <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
         
@@ -22,9 +21,14 @@
         
         <!-- Turf.js plugin -->
         <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+        
+        <link rel="stylesheet" href="css/styles.css" />
+        <script src="https://js.sentry-cdn.com/9c5feb5b248b49f79a585804c259febc.min.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     </head>
 
     <body>
+        <!-- navbar -->
         <nav>
             <div class="logo">
                Kereta Api Dhoho - Penataran
@@ -39,6 +43,8 @@
                 <li><a class="active" href="navigation.html">Navigation</a></li>
             </ul>
         </nav>
+
+        <!-- sidebar list stasiun -->
         <div class="sidebar">
             <div class="heading">
                 <h1>Stasiun</h1>
@@ -46,28 +52,11 @@
             <div id="listings" class="listings"></div>
         </div>
 
+        <!-- map -->
         <div id ="map-container">
             <div id="map" class="map"></div>
         </div>
-
-        <!-- <script>
-            mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ';
-
-            const map = new mapboxgl.Map({
-                container: "map", // Specify the container ID
-                style: 'mapbox://styles/sandraagnes/ckwc3celf1m7p15lr3zvuq69z', //https://api.mapbox.com/styles/v1/sandraagnes/ckwc3celf1m7p15lr3zvuq69z.html?title=view&access_token=pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ&zoomwheel=true&fresh=true#14.45/-8.09922/112.16164 Specify which map style to use 
-                center: [112.363059,-7.650318], // Specify the starting position [lng, lat] 
-                zoom: 8.8 // Specify the starting zoom
-            });
-         
-            map.addControl(
-                new MapboxDirections({
-                accessToken: mapboxgl.accessToken
-                }),
-                'top-left'
-            );
-        </script> -->
         
-        <script src="app3.js"></script>
+        <script src="appnav.js"></script>
     </body>
 </html>

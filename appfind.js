@@ -1,3 +1,13 @@
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ';
+
+const map = new mapboxgl.Map({
+    container: "map", 
+    style: 'mapbox://styles/sandraagnes/ckwc3celf1m7p15lr3zvuq69z', // map hasil buat sendiri dengan tambahan layer rel kereta yang diperbesar
+    center: [112.363059,-7.650318], 
+    zoom: 8.8 
+});
+
+// list stasiun 
 const stations = {
   'type': 'FeatureCollection',
   'features': [
@@ -577,184 +587,209 @@ const stations = {
     }
   ]
 };
-  mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ';
-  
-  const map = new mapboxgl.Map({
-    container: "map", // Specify the container ID
-    style: 'mapbox://styles/sandraagnes/ckwc3celf1m7p15lr3zvuq69z', //https://api.mapbox.com/styles/v1/sandraagnes/ckwc3celf1m7p15lr3zvuq69z.html?title=view&access_token=pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ&zoomwheel=true&fresh=true#14.45/-8.09922/112.16164 Specify which map style to use 
-    center: [112.363059,-7.650318], // Specify the starting position [lng, lat] 
-    zoom: 8.8 // Specify the starting zoom
-  });
-  
-map.addControl(
-    new MapboxDirections({
-         accessToken: mapboxgl.accessToken
-    }),
-    'top-right'
-);
 
+// set id stasiun
 stations.features.forEach((station, i) => {
-    station.properties.id = i;
-  });
-
-map.on('load', () => {
-    map.resize();
-    // Add a GeoJSON source containing place coordinates and information.
-    map.addSource('stations', {
-        'type': 'geojson',
-        'data': stations
-    });
-
-    const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken, // Set the access token
-        mapboxgl: mapboxgl, // Set the mapbox-gl instance
-        marker: {
-          color: 'orange'
-        }, // Use the geocoder's default marker style
-        bbox: [111.68424, -8.76637, 114.58738, -6.749895] // Set the bounding box coordinates - 111.68424, -6.749895, 114.58738, -8.76637
-    });
-      
-    map.addControl(geocoder, 'top-left');
-    
-    buildLocationList(stations);
-    addMarkers();
-
-    geocoder.on('result', (event) => {
-        const searchResult = event.result.geometry;
-    
-        /**
-         * Calculate distances:
-         * For each store, use turf.disance to calculate the distance
-         * in miles between the searchResult and the store. Assign the
-         * calculated value to a property called `distance`.
-         */
-        const options = { units: 'miles' };
-        for (const station of stations.features) {
-          station.properties.distance = turf.distance(
-            searchResult,
-            station.geometry,
-            options
-          );
-        }
-    
-        /**
-         * Sort stores by distance from closest to the `searchResult`
-         * to furthest.
-         */
-          stations.features.sort((a, b) => {
-            if (a.properties.distance > b.properties.distance) {
-              return 1;
-            }
-            if (a.properties.distance < b.properties.distance) {
-              return -1;
-            }
-            return 0; // a must be equal to b
-          });
-    
-          /**
-               * Rebuild the listings:
-               * Remove the existing listings and build the location
-               * list again using the newly sorted stores.
-               */
-           const listings = document.getElementById('listings');
-           while (listings.firstChild) {
-             listings.removeChild(listings.firstChild);
-           }
-           buildLocationList(stations);
-    
-           /** Highlight the listing for the closest store. */
-           const activeListing = document.getElementById(
-             `listing-${stations.features[0].properties.id}`
-           );
-           activeListing.classList.add('active');
-    
-           const bbox = getBbox(stations, 0, searchResult);
-            map.fitBounds(bbox, {
-              padding: 100
-            });
-      });
+  station.properties.id = i;
 });
 
 
-function addMarkers() {
-    /* For each feature in the GeoJSON object above: */
-    for (const marker of stations.features) {
-      /* Create a div element for the marker. */
-      const el = document.createElement('div');
-      /* Assign a unique `id` to the marker. */
-      el.id = `marker-${marker.properties.id}`;
-      /* Assign the `marker` class to each marker for styling. */
-      el.className = 'marker';
-  
-      /**
-       * Create a marker using the div element
-       * defined above and add it to the map.
-       **/
-      new mapboxgl.Marker(el, { offset: [0, -23] })
-        .setLngLat(marker.geometry.coordinates)
-        .addTo(map);
-    }
-  }
+map.on('load', () => {
+  map.resize();       // resize map
 
-function buildLocationList(stations) {
+  // add layer stasiun
+  map.addSource('places', {
+    type: 'geojson',
+    data: stations
+  });
+
+  // geodecoder
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken, 
+    mapboxgl: mapboxgl, 
+    marker: {
+      color: 'orange'
+    }, 
+    bbox: [111.68424, -8.76637, 114.58738, -6.749895] // koordinat bounding box jatim 
+  });
+  
+  map.addControl(geocoder, 'top-left');
+
+  buildLocationList(stations);  // list stasiun di sidebar
+  addMarkers();                 // tambahkan marker lokasi stasiun
+
+  geocoder.on('result', (event) => {
+    const searchResult = event.result.geometry;
+
+    // hitung jarak tiap stasiun ke lokasi hasil geodecoder dg turf.distance 
+    const options = { units: 'miles' };
     for (const station of stations.features) {
-      /* Add a new listing section to the sidebar. */
-      const listings = document.getElementById('listings');
-      const listing = listings.appendChild(document.createElement('div'));
-      /* Assign a unique `id` to the listing. */
-      listing.id = `listing-${station.properties.id}`;
-      /* Assign the `item` class to each listing for styling. */
-      listing.className = 'item';
-  
-      /* Add the link to the individual listing created above. */
-      const link = listing.appendChild(document.createElement('a'));
-      link.href = '#';
-      link.className = 'title';
-      link.id = `link-${station.properties.id}`;
-      link.innerHTML = `${station.properties.address}`;
-  
-      /* Add details to the individual listing. */
-      const details = listing.appendChild(document.createElement('div'));
-      details.innerHTML = `${station.properties.city}`;
-      if (station.properties.postalCode) {
-        details.innerHTML += ` · ${station.properties.postalCode}`;
-      }
-      if (station.properties.distance) {
-        const roundedDistance = Math.round(station.properties.distance * 100) / 100 * 1.609;
-        details.innerHTML += `<div><strong>jarak ${roundedDistance} km</strong></div>`;
-      }
+      station.properties.distance = turf.distance(
+        searchResult,
+        station.geometry,
+        options
+      );
     }
-  }
-  
-  function getBbox(sortedStations, stationIdentifier, searchResult) {
-    const lats = [
-      sortedStations.features[stationIdentifier].geometry.coordinates[1],
-      searchResult.coordinates[1]
-    ];
-    const lons = [
-      sortedStations.features[stationIdentifier].geometry.coordinates[0],
-      searchResult.coordinates[0]
-    ];
-    const sortedLons = lons.sort((a, b) => {
-      if (a > b) {
+
+    // sort stasiun berdasarkan yg terdekat
+    stations.features.sort((a, b) => {
+      if (a.properties.distance > b.properties.distance) {
         return 1;
       }
-      if (a.distance < b.distance) {
+      if (a.properties.distance < b.properties.distance) {
         return -1;
       }
-      return 0;
+      return 0; 
     });
-    const sortedLats = lats.sort((a, b) => {
-      if (a > b) {
-        return 1;
-      }
-      if (a.distance < b.distance) {
-        return -1;
-      }
-      return 0;
+
+    // buat list stasiun yg baru berdasarkan sort jarak terdekat
+    const listings = document.getElementById('listings');
+    while (listings.firstChild) {
+      listings.removeChild(listings.firstChild);
+    }
+    buildLocationList(stations);
+    createPopUp(stations.features[0]);
+
+    // highlight stasiun terdekat
+    const activeListing = document.getElementById(
+      `listing-${stations.features[0].properties.id}`
+    );
+    activeListing.classList.add('active');
+
+    const bbox = getBbox(stations, 0, searchResult);
+    map.fitBounds(bbox, {
+      padding: 100
     });
-    return [
-      [sortedLons[0], sortedLats[0]],
-      [sortedLons[1], sortedLats[1]]
-    ];
+
+    // tampilkan pop up stasiun yg terdekat
+    createPopUp(stations.features[0]);
+  });
+});
+
+// fungsi untuk menambahkan marker lokasi stasiun ke peta
+function addMarkers() {
+  for (const marker of stations.features) {
+    const el = document.createElement('div');
+    el.id = `marker-${marker.properties.id}`;
+    el.className = 'marker';
+
+    new mapboxgl.Marker(el, { offset: [0, -23] })
+      .setLngLat(marker.geometry.coordinates)
+      .addTo(map);
+
+    // interaksi marker
+    el.addEventListener('click', (e) => {
+      // zoom in ke marker terkait
+      flyToPoint(marker); 
+
+      // pop up marker terkait
+      createPopUp(marker);
+
+      // highlight stasiun terkait
+      const activeItem = document.getElementsByClassName('active');
+      e.stopPropagation();
+      if (activeItem[0]) {
+        activeItem[0].classList.remove('active');
+      }
+      const listing = document.getElementById(`listing-${marker.properties.id}`);
+      listing.classList.add('active');
+    });
   }
+}
+
+// buat list stasiun di sidebar
+function buildLocationList(stations) {
+  for (const station of stations.features) {
+    const listings = document.getElementById('listings');
+    const listing = listings.appendChild(document.createElement('div'));
+    listing.id = `listing-${station.properties.id}`;
+    listing.className = 'item';
+
+    const link = listing.appendChild(document.createElement('a'));
+    link.href = '#';
+    link.className = 'title';
+    link.id = `link-${station.properties.id}`;
+    link.innerHTML = `${station.properties.address}`;
+
+    const details = listing.appendChild(document.createElement('div'));
+    details.innerHTML = `${station.properties.city}`;
+    if (station.properties.postalCode) {
+      details.innerHTML += ` · ${station.properties.postalCode}`;
+    }
+    if (station.properties.distance) {
+      const roundedDistance = Math.round(station.properties.distance * 100) / 100 * 1.609;
+      details.innerHTML += `<div><strong>jarak ${roundedDistance} km</strong></div>`;
+    }
+
+    // interaksi
+    link.addEventListener('click', function () {
+      for (const feature of stations.features) {
+        if (this.id === `link-${feature.properties.id}`) {
+          // zoom in ke stasiun terkait
+          flyToPoint(feature);
+
+          // pop up stasiun terkait
+          createPopUp(feature);
+        }
+      }
+      const activeItem = document.getElementsByClassName('active');
+      if (activeItem[0]) {
+        activeItem[0].classList.remove('active');
+      }
+      this.parentNode.classList.add('active');
+    });
+  }
+}
+
+// zoom in ke suatu lokasi
+function flyToPoint(currentFeature) {
+  map.flyTo({
+    center: currentFeature.geometry.coordinates,
+    zoom: 15
+  });
+}
+
+// tampilkan pop up lokasi
+function createPopUp(currentFeature) {
+  const popUps = document.getElementsByClassName('mapboxgl-popup');
+  if (popUps[0]) popUps[0].remove();
+
+  const popup = new mapboxgl.Popup({ closeOnClick: false })
+    .setLngLat(currentFeature.geometry.coordinates)
+    .setHTML(`<h3>Stasiun</h3><h4>${currentFeature.properties.address} - ${currentFeature.properties.city}</h4>`)
+    .addTo(map);
+}
+
+// bounding box peta pencarian
+function getBbox(sortedStations, stationIdentifier, searchResult) {
+  const lats = [
+    sortedStations.features[stationIdentifier].geometry.coordinates[1],
+    searchResult.coordinates[1]
+  ];
+  const lons = [
+    sortedStations.features[stationIdentifier].geometry.coordinates[0],
+    searchResult.coordinates[0]
+  ];
+  const sortedLons = lons.sort((a, b) => {
+    if (a > b) {
+      return 1;
+    }
+    if (a.distance < b.distance) {
+      return -1;
+    }
+    return 0;
+  });
+  const sortedLats = lats.sort((a, b) => {
+    if (a > b) {
+      return 1;
+    }
+    if (a.distance < b.distance) {
+      return -1;
+    }
+    return 0;
+  });
+  return [
+    [sortedLons[0], sortedLats[0]],
+    [sortedLons[1], sortedLats[1]]
+  ];
+}

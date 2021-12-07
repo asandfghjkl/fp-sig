@@ -6,21 +6,25 @@
         <title>Jalur Kereta Api Dhoho - Penataran</title>
         <meta name="robots" content="noindex, nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- import GL JS -->
         <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
         <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet"/>
-        <link rel="stylesheet" href="css/styles.css" />
-        <script src="https://js.sentry-cdn.com/9c5feb5b248b49f79a585804c259febc.min.js" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
-      
+
         <!-- Geocoder plugin -->
         <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
         <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css' type='text/css' />
         
         <!-- Turf.js plugin -->
         <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+        
+        <link rel="stylesheet" href="css/styles.css" />
+        <script src="https://js.sentry-cdn.com/9c5feb5b248b49f79a585804c259febc.min.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     </head>
 
     <body>
+        <!-- navbar -->
         <nav>
             <div class="logo">
                Kereta Api Dhoho - Penataran
@@ -36,6 +40,8 @@
                
             </ul>
         </nav>
+
+        <!-- sidebar list stasiun -->
         <div class="sidebar">
             <div class="heading">
                 <h1>Stasiun</h1>
@@ -43,10 +49,11 @@
             <div id="listings" class="listings"></div>
         </div>
 
+        <!-- map -->
         <div id ="map-container">
             <div id="map" class="map"></div>
         </div>
         
-        <script src="app.js"></script>
+        <script src="appfind.js"></script>
     </body>
 </html>

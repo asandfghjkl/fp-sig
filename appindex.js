@@ -1,5 +1,21 @@
 
-const places = {
+const filterGroup = document.getElementById('filter-group');
+const dhoho = true;
+const penataran = true;
+const dp = true;
+const hl = true;
+
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ';
+
+const map = new mapboxgl.Map({
+  container: "map",
+  style: 'mapbox://styles/sandraagnes/ckwc3celf1m7p15lr3zvuq69z', 
+  center: [112.363059,-7.650318],  
+  zoom: 8.8 
+});
+
+// list stasiun
+const stations = {
   'type': 'FeatureCollection',
   'features': [
     {
@@ -821,105 +837,213 @@ const places = {
   ]
 };
 
-const filterGroup = document.getElementById('filter-group');
-
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ';
-
-const map = new mapboxgl.Map({
-  container: "map", // Specify the container ID
-  style: 'mapbox://styles/sandraagnes/ckwc3celf1m7p15lr3zvuq69z', //https://api.mapbox.com/styles/v1/sandraagnes/ckwc3celf1m7p15lr3zvuq69z.html?title=view&access_token=pk.eyJ1Ijoic2FuZHJhYWduZXMiLCJhIjoiY2t3YzM1bjlwMzBvdTJvcDh5ZDF2OW5qciJ9.v20_qcP9s2aZVFTtC90sBQ&zoomwheel=true&fresh=true#14.45/-8.09922/112.16164 Specify which map style to use 
-  center: [112.363059,-7.650318], // Specify the starting position [lng, lat] 
-  zoom: 8.8 // Specify the starting zoom
+// set id stasiun
+stations.features.forEach((station, i) => {
+  station.properties.id = i;
 });
 
 
 map.on('load', () => {
-  // Add a GeoJSON source containing place coordinates and information.
+  map.resize();   // resize map
+
+  // add layer stasiun
   map.addSource('places', {
-      'type': 'geojson',
-      'data': places
+      type: 'geojson',
+      data: stations
   });
 
-  for (const feature of places.features) {
-      const symbol = feature.properties.icon;
-      const route = feature.properties.route;
-      const layerID = `poi-${route}`;
+  // tambahkan list stasiun ke sidebar
+  buildLocationList(stations);
 
-      addMarkers();
+  for (const feature of stations.features) {
+    const symbol = feature.properties.icon;
+    const route = feature.properties.route;
+    const layerID = `poi-${route}`;
 
-      // Add a layer for this symbol type if it hasn't been added already.
-      if (!map.getLayer(layerID)) {
-          map.addLayer({
-              'id': layerID,
-              'type': 'symbol',
-              'source': 'places',
-              'layout': {
-                  // These icons are a part of the Mapbox Light style.
-                  // To view all images available in a Mapbox style, open
-                  // the style in Mapbox Studio and click the "Images" tab.
-                  // To add a new image to the style at runtime see
-                  // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
-                  // if(feature.properties.route == dhoho)
-                  'icon-image': `${symbol}`, 
-                  'icon-allow-overlap': true
-              },
-              'filter': ['==', 'route', route]
-          });
+    addMarkers();
 
-          // Add checkbox and label elements for the layer.
-          const input = document.createElement('input');
-          input.type = 'checkbox';
-          input.id = layerID;
-          input.checked = true;
-          filterGroup.appendChild(input);
+    // add layer berdasarkan symbol 
+    if (!map.getLayer(layerID)) {
+      map.addLayer({
+        'id': layerID,
+        'type': 'symbol',
+        'source': 'places',
+        'layout': {
+            'icon-image': `${symbol}`, 
+            'icon-allow-overlap': true
+        },
+        'filter': ['==', 'route', route]
+      });
 
-          const label = document.createElement('label');
-          label.setAttribute('for', layerID);
-          label.textContent = route;
-          filterGroup.appendChild(label);
+      // Add checkbox and label elements ke layer.
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = layerID;
+      input.checked = true;
+      filterGroup.appendChild(input);
 
-          // When the checkbox changes, update the visibility of the layer.
-          input.addEventListener('change', (e) => {
-              map.setLayoutProperty(
-                  layerID,
-                  'visibility',
-                  e.target.checked ? 'visible' : 'none'
-              );
-          });
+      const label = document.createElement('label');
+      label.setAttribute('for', layerID);
+      label.textContent = route;
+      filterGroup.appendChild(label);
+    
+      // interaksi filter, apabila ada update maka akan mengubah layer dan list stasiun yang sesuai
+      input.addEventListener('change', (e) => {
+        if(((e.target.id).slice(4)).localeCompare("dhoho") == 0 && e.target.checked == false) { // jika dhoho diklik off, 
+          this.dhoho = true;
         }
+        else if(((e.target.id).slice(4)).localeCompare("dhoho") == 0 && e.target.checked == true) { // jika dhoho diklik off, 
+          this.dhoho = false;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("penataran") == 0 && e.target.checked == false) { // jika dhoho diklik off, 
+          this.penataran = true;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("penataran") == 0 && e.target.checked == true) { // jika dhoho diklik off, 
+          this.penataran = false;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("dhoho - penataran") == 0 && e.target.checked == false) { // jika dhoho diklik off, 
+          this.dp = true;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("dhoho - penataran") == 0 && e.target.checked == true) { // jika dhoho diklik off, 
+          this.dp = false;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("hanya dilewati") == 0 && e.target.checked == false) { // jika dhoho diklik off, 
+          this.hl = true;
+        }
+        else if(((e.target.id).slice(4)).localeCompare("hanya dilewati") == 0 && e.target.checked == true) { // jika dhoho diklik off, 
+          this.hl = false;
+        }
+
+        // hapus list yang sblmnya untuk diganti dg list baru
+        const listings = document.getElementById('listings');
+          while (listings.firstChild) {
+            listings.removeChild(listings.firstChild);
+        }
+
+        // hanya menampilkan list stasiun yang aktif pada filter
+        if(!this.dp) buildLocationListOff(stations, "dhoho - penataran");
+        if(!this.dhoho) buildLocationListOff(stations, "dhoho");
+        if(!this.penataran) buildLocationListOff(stations, "penataran");
+        if(!this.hl) buildLocationListOff(stations, "hanya dilewati");
+
+        // set layout berdasarkan filter
+        map.setLayoutProperty(
+            layerID,
+            'visibility',
+            e.target.checked ? 'visible' : 'none'
+        );
+      });
     }
+  }
 });
 
+// fungsi untuk menambahkan marker lokasi stasiun ke peta
 function addMarkers() {
-  /* For each feature in the GeoJSON object above: */
-  for (const marker of places.features) {
-    /* Create a div element for the marker. */
+  for (const marker of stations.features) {
     const el = document.createElement('div');
-    /* Assign a unique `id` to the marker. */
     el.id = `marker-${marker.properties.id}`;
-    /* Assign the `marker` class to each marker for styling. */
-    el.className = 'marker';
+    el.className = 'markerfilter';
 
-    /**
-     * Create a marker using the div element
-     * defined above and add it to the map.
-     **/
     new mapboxgl.Marker(el, { offset: [0, -23] })
       .setLngLat(marker.geometry.coordinates)
       .addTo(map);
 
+    // interaksi marker
     el.addEventListener('click', (e) => {
-      /* Fly to the point */
       flyToPoint(marker);
-      /* Close all other popups and display popup for clicked store */
       createPopUp(marker);
-      /* Highlight listing in sidebar */
       const activeItem = document.getElementsByClassName('active');
       e.stopPropagation();
     });
   }
 }
 
+// buat list stasiun di sidebar (semua stasiun)
+function buildLocationList(stations) {
+  for (const station of stations.features) {
+      const listings = document.getElementById('listings');
+      const listing = listings.appendChild(document.createElement('div'));
+      listing.id = `listing-${station.properties.id}`;
+      listing.className = 'item';
+
+      const link = listing.appendChild(document.createElement('a'));
+      link.href = '#';
+      link.className = 'title';
+      link.id = `link-${station.properties.id}`;
+      link.route =`${station.properties.route}`;
+      link.innerHTML = `${station.properties.address}`;
+
+      const details = listing.appendChild(document.createElement('div'));
+      details.innerHTML = `${station.properties.city}`;
+      
+      if (station.properties.route) {
+        const roundedDistance = Math.round(station.properties.distance * 100) / 100 * 1.609;
+        details.innerHTML += ` · ${station.properties.route}</div>`;
+      }
+
+      // interaksi
+      link.addEventListener('click', function () {
+        for (const feature of stations.features) {
+          if (this.id === `link-${feature.properties.id}`) {
+            flyToPoint(feature);
+            createPopUp(feature);
+          }
+        }
+        const activeItem = document.getElementsByClassName('active');
+        if (activeItem[0]) {
+          activeItem[0].classList.remove('active');
+        }
+        this.parentNode.classList.add('active');
+      });
+    // }
+  }
+}
+
+// buat list stasiun di sidebar (berdasarkan route yg sesuai)
+function buildLocationListOff(stations, route) {
+  for (const station of stations.features) {
+    const z = `${station.properties.route}`;
+    const r = `${route}`;
+
+    // compate dengan route untuk menampilkan route yg sesuai
+    if(z.localeCompare(r) == 0) {
+      const listings = document.getElementById('listings');
+      const listing = listings.appendChild(document.createElement('div'));
+      listing.id = `listing-${station.properties.id}`;
+      listing.className = 'item';
+
+      const link = listing.appendChild(document.createElement('a'));
+      link.href = '#';
+      link.className = 'title';
+      link.id = `link-${station.properties.id}`;
+      link.innerHTML = `${station.properties.address}`;
+
+      const details = listing.appendChild(document.createElement('div'));
+      details.innerHTML = `${station.properties.city}`;
+      
+      if (station.properties.route) {
+        const roundedDistance = Math.round(station.properties.distance * 100) / 100 * 1.609;
+        details.innerHTML += ` · ${station.properties.route}</div>`;
+      }
+
+      link.addEventListener('click', function () {
+        for (const feature of stations.features) {
+          if (this.id === `link-${feature.properties.id}`) {
+            flyToPoint(feature);
+            createPopUp(feature);
+          }
+        }
+        const activeItem = document.getElementsByClassName('active');
+        if (activeItem[0]) {
+          activeItem[0].classList.remove('active');
+        }
+        this.parentNode.classList.add('active');
+      });
+    }
+  }
+}
+
+// zoom in ke suatu lokasi
 function flyToPoint(currentFeature) {
   map.flyTo({
     center: currentFeature.geometry.coordinates,
@@ -927,9 +1051,9 @@ function flyToPoint(currentFeature) {
   });
 }
 
+// tampilkan pop up lokasi
 function createPopUp(currentFeature) {
   const popUps = document.getElementsByClassName('mapboxgl-popup');
-  /** Check if there is already a popup on the map and if so, remove it */
   if (popUps[0]) popUps[0].remove();
 
   const popup = new mapboxgl.Popup({ closeOnClick: false })

@@ -6,13 +6,16 @@
         <title>Jalur Kereta Api Dhoho - Penataran</title>
         <meta name="robots" content="noindex, nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- import GL JS -->
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
-        <link rel="stylesheet" href="css/styles2.css" />
+
+        <link rel="stylesheet" href="css/styles.css" />
     </head>
 
     <body>
-        
+        <!-- navbar -->
         <nav>
             <div class="logo">
                Kereta Api Dhoho - Penataran
@@ -28,10 +31,22 @@
             </ul>
         </nav>
         
+        <!-- filter box -->
         <div id="filter-group" class="filter-group"></div>
 
-        <div id="map"></div>
+        <!-- sidebar list stasiun -->
+        <div class="sidebar">
+            <div class="heading">
+                <h1>Stasiun</h1>
+            </div>
+            <div id="listings" class="listings"></div>
+        </div>
 
-        <script src="app2.js"></script>
+        <!-- map -->
+        <div id ="map-container">
+            <div id="map" class="map"></div>
+        </div>
+
+        <script src="appindex.js"></script>
     </body>
 </html>

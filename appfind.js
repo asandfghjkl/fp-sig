@@ -623,7 +623,7 @@ map.on('load', () => {
     const searchResult = event.result.geometry;
 
     // hitung jarak tiap stasiun ke lokasi hasil geodecoder dg turf.distance 
-    const options = { units: 'miles' };
+    const options = { units: 'kilometers' };
     for (const station of stations.features) {
       station.properties.distance = turf.distance(
         searchResult,
@@ -718,7 +718,7 @@ function buildLocationList(stations) {
       details.innerHTML += ` · ${station.properties.postalCode}`;
     }
     if (station.properties.distance) {
-      const roundedDistance = Math.round(station.properties.distance * 100) / 100 * 1.609;
+      const roundedDistance = Math.round(station.properties.distance * 100) / 100;
       details.innerHTML += `<div><strong>jarak ${roundedDistance} km</strong></div>`;
     }
 
